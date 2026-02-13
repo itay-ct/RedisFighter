@@ -2,7 +2,7 @@
 
 You can access the hosted version of the Street Fighter game by following this link: [Street Fighter Game](https://streetfighterbymayank.netlify.app/)
 
-This hosted version allows you to play the game directly in your web browser without the need for any downloads or installations. Experience the excitement of classic arcade-style fighting gameplay right from your device!
+This hosted version allows you to play the game directly in your web browser without the need for any downloads or installations. Experience the excitement of classic arcade-style fighting gameplay right from your device!!
 
 <img src="public/images/gameplay.png" alt="Gameplay" width="390" height="240">
 

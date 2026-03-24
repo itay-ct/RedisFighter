@@ -1,4 +1,6 @@
 import { SCENE_HEIGHT, SCENE_WIDTH } from '../constants/stage.js';
+import { controls } from '../config/controls.js';
+import { Control } from '../constants/controls.js';
 import {
 	DEFAULT_SELECTED_FIGHTERS,
 	getRedisRoster,
@@ -13,6 +15,37 @@ const CARD_WIDTH = 86;
 const CARD_HEIGHT = 24;
 const CARD_GAP = 6;
 const GRID_ORIGIN = { x: 12, y: 73 };
+const ATTACK_CONTROL_IDS = [
+	Control.LIGHT_PUNCH,
+	Control.MEDIUM_PUNCH,
+	Control.HEAVY_PUNCH,
+	Control.LIGHT_KICK,
+	Control.MEDIUM_KICK,
+	Control.HEAVY_KICK,
+];
+const KEY_LABELS = {
+	KeyW: 'W',
+	KeyA: 'A',
+	KeyS: 'S',
+	KeyD: 'D',
+	KeyQ: 'Q',
+	KeyE: 'E',
+	KeyR: 'R',
+	KeyF: 'F',
+	KeyV: 'V',
+	KeyG: 'G',
+	ArrowUp: 'UP',
+	ArrowLeft: 'LEFT',
+	ArrowDown: 'DOWN',
+	ArrowRight: 'RIGHT',
+	Slash: '/',
+	ControlRight: 'CTRL',
+	Period: '.',
+	ShiftRight: 'SHIFT',
+	Quote: "'",
+	Enter: 'ENTER',
+};
+const formatKeyLabel = (code) => KEY_LABELS[code] ?? code.replace(/^Key/, '').toUpperCase();
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -33,9 +66,14 @@ export class StartScene {
 	];
 
 	buttons = {
-		flushall: { x: 12, y: 196, width: 92, height: 18 },
-		deploy: { x: 240, y: 196, width: 130, height: 18 },
+		flushall: { x: 12, y: 162, width: 110, height: 12 },
+		deploy: { x: 260, y: 162, width: 110, height: 12 },
 	};
+
+	footerPanels = [
+		{ x: 12, y: 178, width: 174, height: 40 },
+		{ x: 196, y: 178, width: 174, height: 40 },
+	];
 
 	constructor(changeScene) {
 		this.changeScene = changeScene;
@@ -105,33 +143,13 @@ export class StartScene {
 
 	handlePlayerKey = (playerId, event) => {
 		const code = event.code;
-		const isPlayerOne = playerId === 0;
+		const keyboard = controls[playerId].keyboard;
 
-		if (isPlayerOne) {
-			if (code === 'KeyW') return this.moveCursor(playerId, 0, -1);
-			if (code === 'KeyS') return this.moveCursor(playerId, 0, 1);
-			if (code === 'KeyA') return this.moveCursor(playerId, -1, 0);
-			if (code === 'KeyD') return this.moveCursor(playerId, 1, 0);
-			if (['KeyQ', 'KeyE', 'KeyR', 'KeyF', 'KeyV', 'KeyG'].includes(code)) {
-				return this.assignSelection(playerId);
-			}
-			return;
-		}
-
-		if (code === 'ArrowUp') return this.moveCursor(playerId, 0, -1);
-		if (code === 'ArrowDown') return this.moveCursor(playerId, 0, 1);
-		if (code === 'ArrowLeft') return this.moveCursor(playerId, -1, 0);
-		if (code === 'ArrowRight') return this.moveCursor(playerId, 1, 0);
-		if (
-			[
-				'Slash',
-				'ControlRight',
-				'Period',
-				'ShiftRight',
-				'Quote',
-				'Enter',
-			].includes(code)
-		) {
+		if (code === keyboard[Control.UP]) return this.moveCursor(playerId, 0, -1);
+		if (code === keyboard[Control.DOWN]) return this.moveCursor(playerId, 0, 1);
+		if (code === keyboard[Control.LEFT]) return this.moveCursor(playerId, -1, 0);
+		if (code === keyboard[Control.RIGHT]) return this.moveCursor(playerId, 1, 0);
+		if (ATTACK_CONTROL_IDS.some((controlId) => keyboard[controlId] === code)) {
 			return this.assignSelection(playerId);
 		}
 	};
@@ -332,17 +350,68 @@ export class StartScene {
 		context.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1, rect.height - 1);
 
 		context.fillStyle = textColor;
-		context.font = 'bold 8px monospace';
-		context.fillText(label, rect.x + 8, rect.y + 12);
+		context.font = 'bold 6px monospace';
+		context.fillText(label, rect.x + 8, rect.y + 8);
+	};
+
+	getControlRows = (playerId) => {
+		const keyboard = controls[playerId].keyboard;
+
+		return [
+			`MOVE      ${[
+				keyboard[Control.UP],
+				keyboard[Control.LEFT],
+				keyboard[Control.DOWN],
+				keyboard[Control.RIGHT],
+			]
+				.map(formatKeyLabel)
+				.join(' ')}`,
+			`LP/MP/HP  ${[
+				keyboard[Control.LIGHT_PUNCH],
+				keyboard[Control.MEDIUM_PUNCH],
+				keyboard[Control.HEAVY_PUNCH],
+			]
+				.map(formatKeyLabel)
+				.join(' ')}`,
+			`LK/MK/HK  ${[
+				keyboard[Control.LIGHT_KICK],
+				keyboard[Control.MEDIUM_KICK],
+				keyboard[Control.HEAVY_KICK],
+			]
+				.map(formatKeyLabel)
+				.join(' ')}`,
+			'LOCK      ANY ATTACK',
+		];
+	};
+
+	drawControlPanel = (context, playerId, rect) => {
+		const fighter = this.roster.find(
+			(profile) => profile.id === this.selectedFighters[playerId]
+		);
+		const isActive = this.activePlayer === playerId;
+
+		context.fillStyle = fighter.colors.panel;
+		context.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+		context.strokeStyle = isActive ? fighter.colors.primary : '#263142';
+		context.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1, rect.height - 1);
+
+		context.fillStyle = fighter.colors.primary;
+		context.font = 'bold 7px monospace';
+		context.fillText(`P${playerId + 1} KEYS`, rect.x + 8, rect.y + 9);
+
+		context.fillStyle = '#d9e6f2';
+		context.font = '6px monospace';
+		this.getControlRows(playerId).forEach((row, index) => {
+			context.fillText(row, rect.x + 8, rect.y + 17 + index * 8);
+		});
 	};
 
 	drawFooter = (context) => {
-		context.fillStyle = '#8ea4bc';
-		context.font = '7px monospace';
-		context.fillText('Click cards to assign the active player. Space deploys.', 12, 190);
-
-		this.drawButton(context, 'FLUSHALL', this.buttons.flushall, '#ff6b6b');
-		this.drawButton(context, 'DEPLOY MATCH', this.buttons.deploy, '#69efb7');
+		this.drawButton(context, 'ESC / BACK RESET', this.buttons.flushall, '#ff6b6b');
+		this.drawButton(context, 'SPACE START MATCH', this.buttons.deploy, '#69efb7');
+		this.drawControlPanel(context, 0, this.footerPanels[0]);
+		this.drawControlPanel(context, 1, this.footerPanels[1]);
 	};
 
 	draw = (context) => {

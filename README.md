@@ -2,6 +2,8 @@
 
 Redis Fighter is a Redis-learning overlay built on top of the upstream canvas fighting game by Mayank Jain. The combat engine, controls, hitboxes, physics, camera, stage, and pace stay intact; the shipped change set only layers Redis semantics onto the existing match flow.
 
+Live site: [https://redis-fighter.pages.dev/](https://redis-fighter.pages.dev/)
+
 Credit: forked from the original StreetFighter project by Mayank Jain at [github.com/Mayank-Jain-1/StreetFighter](https://github.com/Mayank-Jain-1/StreetFighter).
 
 ## What Shipped

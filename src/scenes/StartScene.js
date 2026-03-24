@@ -66,13 +66,13 @@ export class StartScene {
 	];
 
 	buttons = {
-		flushall: { x: 12, y: 162, width: 110, height: 12 },
-		deploy: { x: 260, y: 162, width: 110, height: 12 },
+		flushall: { x: 12, y: 160, width: 110, height: 12 },
+		deploy: { x: 260, y: 160, width: 110, height: 12 },
 	};
 
 	footerPanels = [
-		{ x: 12, y: 178, width: 174, height: 40 },
-		{ x: 196, y: 178, width: 174, height: 40 },
+		{ x: 12, y: 176, width: 174, height: 42 },
+		{ x: 196, y: 176, width: 174, height: 42 },
 	];
 
 	constructor(changeScene) {
@@ -356,16 +356,16 @@ export class StartScene {
 
 	getControlRows = (playerId) => {
 		const keyboard = controls[playerId].keyboard;
+		const moveKeys = [
+			keyboard[Control.UP],
+			keyboard[Control.LEFT],
+			keyboard[Control.DOWN],
+			keyboard[Control.RIGHT],
+		].map(formatKeyLabel);
 
 		return [
-			`MOVE      ${[
-				keyboard[Control.UP],
-				keyboard[Control.LEFT],
-				keyboard[Control.DOWN],
-				keyboard[Control.RIGHT],
-			]
-				.map(formatKeyLabel)
-				.join(' ')}`,
+			`MOVE      ${moveKeys[0]} ${moveKeys[1]}`,
+			`          ${moveKeys[2]} ${moveKeys[3]}`,
 			`LP/MP/HP  ${[
 				keyboard[Control.LIGHT_PUNCH],
 				keyboard[Control.MEDIUM_PUNCH],
@@ -403,7 +403,7 @@ export class StartScene {
 		context.fillStyle = '#d9e6f2';
 		context.font = '6px monospace';
 		this.getControlRows(playerId).forEach((row, index) => {
-			context.fillText(row, rect.x + 8, rect.y + 17 + index * 8);
+			context.fillText(row, rect.x + 8, rect.y + 17 + index * 6);
 		});
 	};
 

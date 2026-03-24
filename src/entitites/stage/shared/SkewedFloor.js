@@ -3,6 +3,7 @@ import {
 	STAGE_PADDING,
 	STAGE_WIDTH,
 } from "../../../constants/Stage.js";
+import { getRenderScale } from "../../../utils/context.js";
 
 export class SkewedFloor {
 	constructor(image, dimensions) {
@@ -12,15 +13,16 @@ export class SkewedFloor {
 
 	draw = (context, camera, y) => {
 		const [sourceX, sourceY, width, height] = this.dimensions;
+		const scale = getRenderScale();
 
 		context.save();
 		context.setTransform(
-			1,
+			scale,
 			0,
-			-5.15 - (camera.position.x - (STAGE_WIDTH + STAGE_PADDING)) / 112,
-			1,
-			32 - camera.position.x / 1.55,
-			y - camera.position.y
+			(-5.15 - (camera.position.x - (STAGE_WIDTH + STAGE_PADDING)) / 112) * scale,
+			scale,
+			(32 - camera.position.x / 1.55) * scale,
+			(y - camera.position.y) * scale
 		);
 
 		context.drawImage(

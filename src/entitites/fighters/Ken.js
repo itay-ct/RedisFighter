@@ -1393,10 +1393,11 @@ export class Ken extends Fighter {
 		];
 	}
 
-	handleHadoukenInit = () => {
+	handleHadoukenInit = (time) => {
 		this.resetVelocities();
 		this.fireballFired = false;
 		playSound(this.soundHadouken);
+		this.emitCommandStart(time);
 	};
 
 	handleHadouken = (time) => {

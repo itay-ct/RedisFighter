@@ -9,7 +9,6 @@ import {
 	TIME_FLASH_DELAY,
 	TIME_FRAME_KEYS,
 } from '../../constants/battle.js';
-import { FighterId } from '../../constants/fighter.js';
 import { FPS } from '../../constants/game.js';
 import { gameState } from '../../states/gameState.js';
 import { drawFrame } from '../../utils/context.js';
@@ -106,17 +105,11 @@ export class StatusBar {
 		['score-Y', [125, 125, 10, 10]],
 		['score-Z', [136, 125, 10, 10]],
 
-		// Name tags
-		['tag-ken', [128, 56, 30, 9]],
-		['tag-ryu', [16, 56, 28, 9]],
 	]);
 
 	constructor(fighters, onTimeEnd) {
 		this.onTimeEnd = onTimeEnd;
 		this.image = document.getElementById('hud');
-		this.nameTags = gameState.fighters.map(
-			({ id }) => `tag-${id.toLowerCase()}`
-		);
 	}
 
 	drawFrame(context, frameKey, x, y, direction = 1) {
@@ -208,8 +201,8 @@ export class StatusBar {
 	}
 
 	drawNames(context) {
-		this.drawFrame(context, this.nameTags[0], 32, 33);
-		this.drawFrame(context, this.nameTags[1], 322, 33);
+		this.drawNamePlate(context, gameState.fighters[0].profile, 32);
+		this.drawNamePlate(context, gameState.fighters[1].profile, 240);
 	}
 
 	updateTime(time) {
@@ -256,11 +249,27 @@ export class StatusBar {
 		this.drawScoreLabel(context, 'P1', 4);
 		this.drawScore(context, gameState.fighters[0].score, 45);
 
-		this.drawScoreLabel(context, 'May', 133);
-		this.drawScore(context, 50000, 177);
+		this.drawScoreLabel(context, 'REDIS', 161);
 
 		this.drawScoreLabel(context, 'P2', 269);
 		this.drawScore(context, gameState.fighters[1].score, 309);
+	}
+
+	drawNamePlate(context, profile, x) {
+		context.fillStyle = profile.colors.panel;
+		context.fillRect(x, 33, 110, 11);
+		context.strokeStyle = profile.colors.primary;
+		context.strokeRect(x + 0.5, 33.5, 109, 10);
+
+		context.fillStyle = profile.colors.primary;
+		context.fillRect(x + 2, 35, 11, 7);
+		context.fillStyle = '#06111a';
+		context.font = 'bold 7px monospace';
+		context.fillText(profile.icon, x + 3, 41);
+
+		context.fillStyle = '#f7fbff';
+		context.font = 'bold 8px monospace';
+		context.fillText(profile.hudName, x + 17, 41);
 	}
 
 	draw(context) {

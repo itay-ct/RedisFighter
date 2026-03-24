@@ -103,6 +103,8 @@ export class Fireball {
 
 	constructor(fighter, strength, time, entities) {
 		this.fighter = fighter;
+		this.image = fighter.image;
+		this.tint = fighter.redisProfile?.colors.primary;
 		this.direction = this.fighter.direction;
 		this.strength = strength;
 		this.velocity = fireballVelocity[strength];
@@ -255,6 +257,7 @@ export class Fireball {
 		const [[[x, y, width, height], [originX, originY]]] =
 			this.frames.get(frameKey);
 
+		context.save();
 		context.scale(this.direction, 1);
 		context.drawImage(
 			this.image,
@@ -268,8 +271,18 @@ export class Fireball {
 			width,
 			height
 		);
-
-		context.setTransform(1, 0, 0, 1, 0, 0);
+		if (this.tint) {
+			context.globalCompositeOperation = 'source-atop';
+			context.globalAlpha = 0.4;
+			context.fillStyle = this.tint;
+			context.fillRect(
+				Math.floor(this.position.x - camera.position.x) * this.direction - originX,
+				Math.floor(this.position.y - camera.position.y) - originY,
+				width,
+				height
+			);
+		}
+		context.restore();
 	};
 
 	draw = (context, camera) => {

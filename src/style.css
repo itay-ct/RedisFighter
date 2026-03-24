@@ -5,7 +5,8 @@
 }
 
 body{
-  background: #000;
+  background: radial-gradient(circle at top, #1a2434 0%, #02060d 72%);
+  overflow: hidden;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -22,13 +23,19 @@ html {
 main{
   height: 100vh;
   width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
 }
 canvas{
-  width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  display: block;
+  width: 382px;
+  height: 224px;
   image-rendering: crisp-edges;
   image-rendering: pixelated;
+  border: 1px solid #162131;
+  box-shadow: 0 0 0 1px rgba(123, 155, 194, 0.2), 0 18px 56px rgba(0, 0, 0, 0.55);
 }
 
 img{

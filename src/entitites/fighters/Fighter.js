@@ -65,6 +65,8 @@ export class Fighter {
 	hurtShake = 0;
 
 	victory = false;
+	redisProfile = undefined;
+	onCommandStart = undefined;
 
 	opponent = undefined;
 	boxes = {
@@ -362,6 +364,16 @@ export class Fighter {
 		};
 		this.controlHistory = new ControlHistory(this);
 	}
+
+	attachRedisProfile = (profile, onCommandStart) => {
+		this.redisProfile = profile;
+		this.onCommandStart = onCommandStart;
+	};
+
+	emitCommandStart = (time) => {
+		if (!this.redisProfile || !this.onCommandStart) return;
+		this.onCommandStart(time, this.playerId, this.currentState, this.redisProfile);
+	};
 
 	hasCollidedWithOpponent = () =>
 		rectsOverlap(
@@ -664,6 +676,7 @@ export class Fighter {
 	handleAttackInit = (time) => {
 		this.resetVelocities();
 		playSound(this.soundAttacks[this.states[this.currentState].attackStrength]);
+		this.emitCommandStart(time);
 	};
 
 	handleLightAttackReset = (time) => {
@@ -923,27 +936,57 @@ export class Fighter {
 		this.controlHistory.update(time);
 	};
 
+	drawAura = (context, camera) => {
+		if (!this.redisProfile) return;
+
+		const x = Math.floor(this.position.x - camera.position.x);
+		const y = Math.floor(this.position.y - camera.position.y);
+		const intensity = this.states[this.currentState].attackStrength ? 0.26 : 0.14;
+
+		context.save();
+		context.globalAlpha = intensity;
+		context.fillStyle = this.redisProfile.colors.primary;
+		context.fillRect(x - 16, y - 94, 32, 2);
+		context.fillRect(x - 16, y - 52, 32, 2);
+		context.fillRect(x - 16, y - 94, 2, 44);
+		context.fillRect(x + 14, y - 94, 2, 44);
+		context.fillRect(x - 18, y - 6, 36, 2);
+		context.restore();
+	};
+
 	draw = (context, camera) => {
 		const frameKey = this.animations[this.currentState][this.animationFrame][0];
 		const [[[x, y, width, height], [originX, originY]]] =
 			this.frames.get(frameKey);
+		const spriteX =
+			Math.floor((this.position.x - camera.position.x) * this.direction) - originX;
+		const spriteY = Math.floor(this.position.y - camera.position.y) - originY;
 
+		this.drawAura(context, camera);
+
+		context.save();
 		context.scale(this.direction, 1);
-
 		context.drawImage(
 			this.image,
 			x - this.hurtShake,
 			y,
 			width,
 			height,
-			Math.floor((this.position.x - camera.position.x) * this.direction) -
-				originX,
-			Math.floor(this.position.y - camera.position.y) - originY,
+			spriteX,
+			spriteY,
 			width,
 			height
 		);
 
-		context.setTransform(1, 0, 0, 1, 0, 0);
+		if (this.redisProfile) {
+			context.globalCompositeOperation = 'source-atop';
+			context.globalAlpha = this.states[this.currentState].attackStrength
+				? 0.24
+				: 0.18;
+			context.fillStyle = this.redisProfile.colors.tint;
+			context.fillRect(spriteX, spriteY, width, height);
+		}
+		context.restore();
 		DRAW_DEBUG && DEBUG_drawCollisionInfo(this, context, camera);
 	};
 }

@@ -31,6 +31,7 @@ export class Shadow {
 			1.2, 1.2, 0, 0,
 		];
 
+		context.save();
 		context.globalAlpha = 0.5;
 		context.drawImage(
 			this.image,
@@ -45,7 +46,6 @@ export class Shadow {
 			Math.floor(width * scaleX),
 			Math.floor(height * scaleY)
 		);
-		context.globalAlpha = 1;
-		context.setTransform(1, 0, 0, 1, 0, 0);
+		context.restore();
 	};
 }

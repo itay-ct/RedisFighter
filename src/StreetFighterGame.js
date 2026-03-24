@@ -3,7 +3,11 @@ import {
 	registerKeyboardEvents,
 	updateGamePads,
 } from './engine/InputHandler.js';
-import { getContext } from './utils/context.js';
+import {
+	getContext,
+	prepareContext,
+	resizeCanvasDisplay,
+} from './utils/context.js';
 import { BattleScene } from './scenes/BattleScene.js';
 import { GAME_SPEED } from './constants/game.js';
 import { StartScene } from './scenes/StartScene.js';
@@ -24,6 +28,7 @@ export class StreetFighterGame {
 	contextHandler = new ContextHandler(this.context);
 
 	changeScene = (SceneClass) => {
+		this.scene?.dispose?.();
 		this.contextHandler.startDimDown();
 		this.sceneStarted = false;
 		this.nextScene = SceneClass;
@@ -61,6 +66,7 @@ export class StreetFighterGame {
 		};
 		updateGamePads();
 		this.contextHandler.update(this.frameTime);
+		prepareContext(this.context);
 		this.context.filter = `brightness(${this.contextHandler.brightness}) contrast(${this.contextHandler.contrast})`;
 		this.updateScenes();
 	};
@@ -68,6 +74,8 @@ export class StreetFighterGame {
 	start() {
 		registerKeyboardEvents();
 		registerGamepadEvents();
+		resizeCanvasDisplay();
+		window.addEventListener('resize', resizeCanvasDisplay);
 		window.requestAnimationFrame(this.frame.bind(this));
 	}
 }

@@ -1,4 +1,4 @@
-import { SCENE_HEIGHT, SCENE_WIDTH } from '../constants/Stage.js';
+import { SCENE_HEIGHT, SCENE_WIDTH } from '../constants/stage.js';
 
 let renderScale = 1;
 
